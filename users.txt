@@ -1,0 +1,3 @@
+Ron:0
+Bella:1
+Nana:2
