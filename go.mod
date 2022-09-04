@@ -1,3 +1,3 @@
-module reading-remote-files-and-write-to-local-files
+module reading-remote-files-and-write-into-a-stream
 
 go 1.19

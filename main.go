@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const flags = os.O_CREATE | os.O_WRONLY | os.O_TRUNC
+
 func main() {
 	const url = "https://martinfowler.com/"
 	const filePath = "./website.html"
@@ -26,16 +28,15 @@ func main() {
 
 	resp, err := client.Do(req)
 
-	// resp contains an io.ReadCloser that we can read as a file.
-	// Let's use io.ReadAll() to read the entire content to data.
-	data, err := io.ReadAll(resp.Body)
+	// Open the file to prepare to write the data received from resp
+	file, err := os.OpenFile(filePath, flags, 0644)
 	if err != nil {
 		panic(err)
 	}
+	defer file.Close()
 
-	// Write the data into the file
-	err = os.WriteFile(filePath, []byte(data), 0644)
-	if err != nil {
+	// Stream the data received from resp directly to the local file
+	if _, err := io.Copy(file, resp.Body); err != nil {
 		panic(err)
 	}
 
