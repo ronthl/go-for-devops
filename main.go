@@ -19,6 +19,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer file.Close()
 
 	// Stream the file content to stdout to show it worked
 	io.Copy(os.Stdout, file)
