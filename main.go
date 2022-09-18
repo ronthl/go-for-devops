@@ -7,8 +7,10 @@ import (
 	"strings"
 )
 
+// record represents a record containing first name and last name that are store in a csv.
 type record []string
 
+// validate validates if the csv line was had the correct number of entries.
 func (rec record) validate() error {
 	if len(rec) != 2 {
 		return errors.New("data format is incorrect")
@@ -16,10 +18,12 @@ func (rec record) validate() error {
 	return nil
 }
 
+// first returns the record's first name.
 func (rec record) first() string {
 	return rec[0]
 }
 
+// last returns the record's last name.
 func (rec record) last() string {
 	return rec[1]
 }
@@ -38,7 +42,10 @@ func main() {
 	}
 }
 
+// readRecords imports a csv file into the binary and manipulates it to return the recors.
+// This will skip any blank lines and stop on the first error encountered.
 func readRecords() ([]record, error) {
+	// Imports a csv file into the binary
 	byteData, err := os.ReadFile("data.csv")
 	if err != nil {
 		return nil, err
