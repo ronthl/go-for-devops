@@ -12,3 +12,5 @@ https://github.com/ronthl/go-for-devops/tree/014/imports-entire-csv-file-and-man
 https://github.com/ronthl/go-for-devops/tree/015/streams-csv-file-and-manipulates-it
 * Writes records to a csv file:
 https://github.com/ronthl/go-for-devops/tree/017/writes-records-to-csv
+* Streams a csv file and manipulates it with the csv package:
+https://github.com/ronthl/go-for-devops/tree/018/stream-csv-file-and-manipulates-it-with-csv-package
