@@ -2,11 +2,16 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 )
+
+const FLAG = os.O_CREATE | os.O_WRONLY | os.O_TRUNC
+const CSV_SORTED = "data-sorted.csv"
 
 // record represents a record containing first name and last name that are store in a csv.
 type record []string
@@ -29,23 +34,37 @@ func (rec record) last() string {
 	return rec[1]
 }
 
+// csv outputs the data in csv format.
+func (rec record) csv() []byte {
+	b := bytes.Buffer{}
+	for _, field := range rec {
+		b.WriteString(field + ",")
+	}
+
+	b.WriteString("\n")
+	return b.Bytes()
+}
+
 func main() {
-	records, err := readRecords()
+	records, err := readRecords("data.csv")
 	if err != nil {
 		panic(err)
 	}
 
-	for i, rec := range records {
-		if i != 0 {
-			fmt.Println("*******")
-		}
-		fmt.Printf("First Name: %s\nLast Name: %s\n", rec.first(), rec.last())
+	if err = writeRecords(records); err != nil {
+		panic(err)
 	}
+
+	data, err := os.ReadFile(CSV_SORTED)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("*** SORTED ***\n%s", data)
 }
 
 // readRecords stream a csv file and manipulates it to return the records.
 // This will skip any blank lines and stop on the first error encountered.
-func readRecords() ([]record, error) {
+func readRecords(filename string) ([]record, error) {
 	file, err := os.Open("data.csv")
 	if err != nil {
 		return nil, err
@@ -72,4 +91,29 @@ func readRecords() ([]record, error) {
 	}
 
 	return records, nil
+}
+
+func writeRecords(records []record) error {
+	file, err := os.OpenFile(CSV_SORTED, FLAG, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Sort by last name
+	sort.Slice(
+		records,
+		func(i, j int) bool {
+			return records[i].last() < records[j].last()
+		},
+	)
+
+	for _, rec := range records {
+		_, err := file.Write(rec.csv())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

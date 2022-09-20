@@ -16,3 +16,6 @@
 
 # MacOS directory 
 .DS_Store
+
+# Generated files
+data-sorted.csv
