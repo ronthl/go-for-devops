@@ -42,7 +42,7 @@ func main() {
 	}
 }
 
-// readRecords imports a csv file into the binary and manipulates it to return the recors.
+// readRecords imports a csv file into the binary and manipulates it to return the records.
 // This will skip any blank lines and stop on the first error encountered.
 func readRecords() ([]record, error) {
 	// Imports a csv file into the binary
