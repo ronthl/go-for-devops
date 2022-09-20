@@ -2,14 +2,16 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 )
 
+var comma = []byte(`,`)
+
 // record represents a record containing first name and last name that are store in a csv.
-type record []string
+type record [][]byte
 
 // validate validates if the csv line was had the correct number of entries.
 func (rec record) validate() error {
@@ -20,12 +22,12 @@ func (rec record) validate() error {
 }
 
 // first returns the record's first name.
-func (rec record) first() string {
+func (rec record) first() []byte {
 	return rec[0]
 }
 
 // last returns the record's last name.
-func (rec record) last() string {
+func (rec record) last() []byte {
 	return rec[1]
 }
 
@@ -58,12 +60,12 @@ func readRecords() ([]record, error) {
 
 	lineNum := 0
 	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.TrimSpace(line) == "" {
+		line := scanner.Bytes()
+		if len(bytes.TrimSpace(line)) == 0 {
 			continue
 		}
 
-		var rec record = strings.Split(line, ",")
+		var rec record = bytes.Split(line, comma)
 		if err = rec.validate(); err != nil {
 			return nil, fmt.Errorf("entry at line %d was invalid: %w", lineNum, err)
 		}
