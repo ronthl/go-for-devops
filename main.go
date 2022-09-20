@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bufio"
+	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"os"
-	"strings"
 )
 
 // record represents a record containing first name and last name that are store in a csv.
@@ -52,22 +52,21 @@ func readRecords() ([]record, error) {
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	reader := csv.NewReader(file)
+	reader.FieldsPerRecord = 2
+	reader.TrimLeadingSpace = true
 
 	var records []record
-
-	lineNum := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.TrimSpace(line) == "" {
-			continue
+	for {
+		line, err := reader.Read()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
 		}
 
-		var rec record = strings.Split(line, ",")
-		if err = rec.validate(); err != nil {
-			return nil, fmt.Errorf("entry at line %d was invalid: %w", lineNum, err)
-		}
-
+		rec := record(line)
 		records = append(records, rec)
 	}
 
