@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"os"
@@ -42,31 +43,33 @@ func main() {
 	}
 }
 
-// readRecords imports a csv file into the binary and manipulates it to return the recors.
+// readRecords stream a csv file and manipulates it to return the records.
 // This will skip any blank lines and stop on the first error encountered.
 func readRecords() ([]record, error) {
-	// Imports a csv file into the binary
-	byteData, err := os.ReadFile("data.csv")
+	file, err := os.Open("data.csv")
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
-	content := string(byteData)
-	lines := strings.Split(content, "\n")
+	scanner := bufio.NewScanner(file)
 
 	var records []record
 
-	for i, line := range lines {
+	lineNum := 0
+	for scanner.Scan() {
+		line := scanner.Text()
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
 
 		var rec record = strings.Split(line, ",")
-		if err := rec.validate(); err != nil {
-			return nil, fmt.Errorf("entry at line %d was invalid: %w", i, err)
+		if err = rec.validate(); err != nil {
+			return nil, fmt.Errorf("entry at line %d was invalid: %w", lineNum, err)
 		}
 
 		records = append(records, rec)
 	}
+
 	return records, nil
 }
