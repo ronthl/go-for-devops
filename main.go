@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
+	"encoding/csv"
 	"errors"
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 )
 
 const FLAG = os.O_CREATE | os.O_WRONLY | os.O_TRUNC
@@ -46,12 +45,13 @@ func (rec record) csv() []byte {
 }
 
 func main() {
-	records, err := readRecords("data.csv")
-	if err != nil {
-		panic(err)
+	records := []record{
+		{"Johnny", "Depp"},
+		{"Emma", "Watson"},
+		{"Sasuke", "Uchiha"},
 	}
 
-	if err = writeRecords(records); err != nil {
+	if err := writeRecords(records); err != nil {
 		panic(err)
 	}
 
@@ -62,37 +62,7 @@ func main() {
 	fmt.Printf("*** SORTED ***\n%s", data)
 }
 
-// readRecords stream a csv file and manipulates it to return the records.
-// This will skip any blank lines and stop on the first error encountered.
-func readRecords(filename string) ([]record, error) {
-	file, err := os.Open("data.csv")
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	var records []record
-
-	lineNum := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-
-		var rec record = strings.Split(line, ",")
-		if err = rec.validate(); err != nil {
-			return nil, fmt.Errorf("entry at line %d was invalid: %w", lineNum, err)
-		}
-
-		records = append(records, rec)
-	}
-
-	return records, nil
-}
-
+// writeRecords writes the given records to a csv file.
 func writeRecords(records []record) error {
 	file, err := os.OpenFile(CSV_SORTED, FLAG, 0644)
 	if err != nil {
@@ -108,9 +78,11 @@ func writeRecords(records []record) error {
 		},
 	)
 
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
 	for _, rec := range records {
-		_, err := file.Write(rec.csv())
-		if err != nil {
+		if err = writer.Write(rec); err != nil {
 			return err
 		}
 	}
